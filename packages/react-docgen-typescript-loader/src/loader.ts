@@ -1,4 +1,5 @@
 import webpack from "webpack";
+import ts from 'typescript';
 // TODO: Import from "react-docgen-typescript" directly when
 // https://github.com/styleguidist/react-docgen-typescript/pull/104 is hopefully
 // merged in. Will be considering to make a peer dependency as that point.
@@ -67,6 +68,18 @@ function processResource(
             skipPropsWithoutDoc: options.skipPropsWithoutDoc || undefined,
           }
         : options.propFilter,
+    componentNameResolver: (symbol) => {
+      const declaration = symbol.declarations[0] as ts.NamedDeclaration;
+
+      if (declaration) {
+        if (typeof declaration.name === 'object' && 'escapedText' in declaration.name) {
+          return String(declaration.name.escapedText);
+        }
+        return String(declaration.name);
+      }
+
+      return null;
+    },
   };
 
   // Configure parser using settings provided to loader.
